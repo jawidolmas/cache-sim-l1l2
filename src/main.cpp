@@ -2,6 +2,12 @@
 #include<cstdint>
 #include<cassert>
 #include<array>
+#include<random>
+
+
+    const uint64_t block_size = 64;   // 6 offset bits
+    const uint64_t num_sets = 512;    // 9 index bits
+    bool verbose = true;
 
 struct CacheLine{             
     bool  valid = false;
@@ -37,20 +43,58 @@ void cache_access(uint64_t address, uint64_t block_size, uint64_t num_sets){
 
     if(line.valid && line.tag == parts.tag){
       hits++;
-      std::cout << address << " HIT " << std::endl;
+      if(verbose) std::cout << address << " HIT " << std::endl;
     }else{
       misses++;
-      std::cout << address << " MISS" << std::endl;
+      if(verbose) std::cout << address << " MISS" << std::endl;
       line.valid = true;
       line.tag = parts.tag;
     }
 }
 
 
+
+double hit_ratio(){
+    double total = hits + misses;
+    if(total == 0){
+      return 0.0;
+    }
+    return 100 * hits/total;
+}
+
+void reset_cache(){
+  for(CacheLine& l : lines){
+    l = CacheLine();
+  }
+  hits = 0;
+  misses = 0;
+}
+
+void sequential_experiment(uint64_t step, int count){
+    reset_cache();
+    for(int i = 0;  i < count; i++){
+        cache_access(i * step, block_size, num_sets);
+    } 
+    std::cout << "HITS = " << hits << " MISSES = " << misses <<  " HIT RATIO = " << hit_ratio() << std::endl;
+}
+
+void random_experiment(uint64_t range, int count){
+    reset_cache();
+
+    std::mt19937_64 gen(42);                                  // fixed seed
+    std::uniform_int_distribution<uint64_t> dist(0, range - 1);
+
+    for(int i = 0; i<count; i++){
+      uint64_t address  = dist(gen);
+      cache_access(address, block_size, num_sets);
+    }
+    std::cout << "HITS = " << hits << " MISSES = " << misses <<  " HIT RATIO = " << hit_ratio() << std::endl;
+}
+
+
 int main()
 {
-    const uint64_t block_size = 64;   // 6 offset bits
-    const uint64_t num_sets = 512;    // 9 index bits
+    verbose = false;   // no per-access printing for big runs
 
     // Part 1: split checks
     AddressParts a = split(0x1234, block_size, num_sets);
@@ -64,43 +108,28 @@ int main()
 
     std::cout << "All address splits correct.\n\n";
 
-    // Part 2: Test A (expected: MISS, MISS, MISS)
-    std::cout << "--- A ---\n";
-    uint64_t testA[] = {0x0, 0x8000, 0x0};
-    for (uint64_t x : testA) {
-        cache_access(x, block_size, num_sets);
-    }
-    std::cout << "hits = " << hits << ", misses = " << misses << "\n\n";
+    const int count = 1000000;
 
-    // Reset before the next test
-    lines.fill(CacheLine());
-    hits = 0;
-    misses = 0;
+    // Part 2: sequential experiments
+    std::cout << "=== Sequential ===\n";
+    std::cout << "step 4:   ";
+    sequential_experiment(4, count);
+    std::cout << "step 64:  ";
+    sequential_experiment(64, count);
+    std::cout << "step 128: ";
+    sequential_experiment(128, count);
 
-    // Part 3: Test B (expected: MISS, HIT, MISS, HIT)
-    std::cout << "--- B ---\n";
-    uint64_t testB[] = {0x0, 0x0, 0x8000, 0x8000};
-    for (uint64_t x : testB) {
-        cache_access(x, block_size, num_sets);
-    }
-    std::cout << "hits = " << hits << ", misses = " << misses << "\n\n";
-
-    // Reset again
-    lines.fill(CacheLine());
-    hits = 0;
-    misses = 0;
-
-    // Part 4: Test C (expected: MISS, HIT, HIT)
-    std::cout << "--- C ---\n";
-    uint64_t testC[] = {0x0, 0x20, 0x3F};
-    for (uint64_t x : testC) {
-        cache_access(x, block_size, num_sets);
-    }
-    std::cout << "hits = " << hits << ", misses = " << misses << "\n";
+    // Part 3: random experiments
+    std::cout << "\n=== Random ===\n";
+    std::cout << "range 16 KB: ";
+    random_experiment(16 * 1024, count);
+    std::cout << "range 32 KB: ";
+    random_experiment(32 * 1024, count);
+    std::cout << "range 1 MB:  ";
+    random_experiment(1024 * 1024, count);
 
     return 0;
 }
-
 
 /*
   Direct-mapped cache simulator (32 KB, 64-byte blocks, 512 sets).
@@ -112,8 +141,13 @@ int main()
   line is valid and its stored tag matches the address tag. Otherwise
   it is a miss, and the line is replaced with the new block.
 
-  Tests:
-    A: two addresses in the same set -> conflict misses
-    B: repeated addresses            -> hits after the first load
-    C: addresses in one block        -> spatial locality
+  Experiments (1,000,000 accesses each):
+    Sequential: addresses advance by a fixed step (4, 64, 128 bytes)
+                -> shows spatial locality
+    Random:     addresses drawn uniformly from a range (16 KB, 32 KB, 1 MB)
+                -> shows how the working set size affects the hit rate
+
+  Set verbose = true to print every access (HIT or MISS).
+  Results are repeatable because the random generator uses a fixed seed.
 */
+
