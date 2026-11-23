@@ -31,7 +31,7 @@ AddressParts split(uint64_t address, uint64_t block_size, uint64_t num_sets){
     p.set_index = (address >> offset_bits) & (num_sets -1);
     p.tag = address >> (offset_bits + index_bits);
     return p; 
-}
+}    
 
 std::array<CacheLine, 512> lines;
 int hits = 0;
@@ -82,7 +82,7 @@ void random_experiment(uint64_t range, int count){
     reset_cache();
 
     std::mt19937_64 gen(42);                                  // fixed seed
-    std::uniform_int_distribution<uint64_t> dist(0, range - 1);
+    std::uniform_int_distribution<uint64_t> dist(0, range - 1);   // rand()
 
     for(int i = 0; i<count; i++){
       uint64_t address  = dist(gen);
