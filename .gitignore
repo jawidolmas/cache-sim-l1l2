@@ -1,0 +1,6 @@
+sim
+main
+main.exe
+*.o
+*.exe
+.vscode/
