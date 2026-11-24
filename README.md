@@ -82,14 +82,77 @@ A Makefile will replace this command in Milestone 2.
 
 ## Tests
 
-The program checks the address split with assert() on three hand-checked
-addresses before running the experiments.
+TEST RESULTS 
 
-| Test | Input                    | Expected result        | Shows              |
-|------|--------------------------|------------------------|--------------------|
-| A    | 0x0, 0x8000, 0x0         | MISS, MISS, MISS       | Conflict misses    |
-| B    | 0x0, 0x0, 0x8000, 0x8000 | MISS, HIT, MISS, HIT   | Reuse after load   |
-| C    | 0x0, 0x20, 0x3F          | MISS, HIT, HIT         | Spatial locality   |
+All address splits correct.
+
+=== LRU: expect MISS MISS HIT MISS MISS ===
+0x0 set 0 MISS
+0x4000 set 0 MISS
+0x0 set 0 HIT
+0x8000 set 0 MISS
+0x4000 set 0 MISS
+
+=== FIFO: expect MISS MISS HIT MISS HIT ===
+0x0 set 0 MISS
+0x4000 set 0 MISS
+0x0 set 0 HIT
+0x8000 set 0 MISS
+0x4000 set 0 HIT
+
+##### 1 way(s), LRU #####
+seq step 4:    HITS = 937500 MISSES = 62500 HIT RATIO = 93.75
+seq step 64:   HITS = 0 MISSES = 1000000 HIT RATIO = 0
+seq step 128:  HITS = 0 MISSES = 1000000 HIT RATIO = 0
+rand 16 KB:    HITS = 999744 MISSES = 256 HIT RATIO = 99.9744
+rand 32 KB:    HITS = 999488 MISSES = 512 HIT RATIO = 99.9488
+rand 1 MB:     HITS = 31039 MISSES = 968961 HIT RATIO = 3.1039
+
+##### 2 way(s), LRU #####
+seq step 4:    HITS = 937500 MISSES = 62500 HIT RATIO = 93.75
+seq step 64:   HITS = 0 MISSES = 1000000 HIT RATIO = 0
+seq step 128:  HITS = 0 MISSES = 1000000 HIT RATIO = 0
+rand 16 KB:    HITS = 999744 MISSES = 256 HIT RATIO = 99.9744
+rand 32 KB:    HITS = 999488 MISSES = 512 HIT RATIO = 99.9488
+rand 1 MB:     HITS = 31192 MISSES = 968808 HIT RATIO = 3.1192
+
+##### 4 way(s), LRU #####
+seq step 4:    HITS = 937500 MISSES = 62500 HIT RATIO = 93.75
+seq step 64:   HITS = 0 MISSES = 1000000 HIT RATIO = 0
+seq step 128:  HITS = 0 MISSES = 1000000 HIT RATIO = 0
+rand 16 KB:    HITS = 999744 MISSES = 256 HIT RATIO = 99.9744
+rand 32 KB:    HITS = 999488 MISSES = 512 HIT RATIO = 99.9488
+rand 1 MB:     HITS = 31106 MISSES = 968894 HIT RATIO = 3.1106
+
+##### 8 way(s), LRU #####
+seq step 4:    HITS = 937500 MISSES = 62500 HIT RATIO = 93.75
+seq step 64:   HITS = 0 MISSES = 1000000 HIT RATIO = 0
+seq step 128:  HITS = 0 MISSES = 1000000 HIT RATIO = 0
+rand 16 KB:    HITS = 999744 MISSES = 256 HIT RATIO = 99.9744
+rand 32 KB:    HITS = 999488 MISSES = 512 HIT RATIO = 99.9488
+rand 1 MB:     HITS = 31062 MISSES = 968938 HIT RATIO = 3.1062
+
+##### Strided, LRU #####
+ways 1, K 2: hit ratio 0%
+ways 1, K 3: hit ratio 0%
+ways 1, K 4: hit ratio 0%
+ways 1, K 5: hit ratio 0%
+ways 1, K 9: hit ratio 0%
+ways 2, K 2: hit ratio 99.9%
+ways 2, K 3: hit ratio 0%
+ways 2, K 4: hit ratio 0%
+ways 2, K 5: hit ratio 0%
+ways 2, K 9: hit ratio 0%
+ways 4, K 2: hit ratio 99.9%
+ways 4, K 3: hit ratio 99.9%
+ways 4, K 4: hit ratio 99.9%
+ways 4, K 5: hit ratio 0%
+ways 4, K 9: hit ratio 0%
+ways 8, K 2: hit ratio 99.9%
+ways 8, K 3: hit ratio 99.9%
+ways 8, K 4: hit ratio 99.9%
+ways 8, K 5: hit ratio 99.9%
+ways 8, K 9: hit ratio 0%
 
 ## Project layout
 
