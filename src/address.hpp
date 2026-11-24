@@ -1,6 +1,6 @@
-#include<iostream>
-#include<cstdint>
 #pragma once
+#include<cstdint>
+
 
 
 struct AddressParts{
@@ -10,7 +10,7 @@ struct AddressParts{
 };
 
 
-AddressParts split(uint64_t address, uint64_t block_size, uint64_t num_sets){
+inline AddressParts split(uint64_t address, uint64_t block_size, uint64_t num_sets){
     int offset_bits = __builtin_ctzll(block_size);
     int index_bits = __builtin_ctzll(num_sets);
 
