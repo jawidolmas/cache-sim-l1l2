@@ -14,7 +14,7 @@ Cache::Cache(uint64_t total_size, uint64_t block_size, uint64_t ways, Policy pol
       verbose_ = false;
 }
 
-void Cache::access(uint64_t address){
+bool Cache::access(uint64_t address){
     clock_++;
     AddressParts parts = split(address, block_size_, num_sets_);
     std::vector<CacheLine>& set = sets_[parts.set_index];
@@ -30,7 +30,7 @@ void Cache::access(uint64_t address){
                 std::cout << "0x" << std::hex << address << std::dec
                           << " set " << parts.set_index << " HIT\n";
             }
-            return;   // outside the verbose check
+            return true;   // outside the verbose check
         }
     }
 
@@ -59,7 +59,9 @@ void Cache::access(uint64_t address){
     if(verbose_){
         std::cout << "0x" << std::hex << address << std::dec
                   << " set " << parts.set_index << " MISS\n";
+                  
     }
+    return false;
 }
 
 
