@@ -5,3 +5,5 @@ main.exe
 *.exe
 .vscode/
 build/
+traces/*.trace
+matmul
