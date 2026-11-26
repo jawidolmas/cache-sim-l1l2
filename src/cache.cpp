@@ -72,6 +72,7 @@ void Cache::reset() {
 
     hits_ = 0;
     misses_ = 0;
+    clock_ = 0;
 }
 
 double Cache::hit_ratio() const{
