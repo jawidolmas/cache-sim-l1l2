@@ -29,7 +29,7 @@ class Cache{
     
   public:
     Cache(uint64_t total_size, uint64_t block_size, uint64_t ways, Policy policy);
-    void access(uint64_t address);
+    bool access(uint64_t address);
     void reset();
     double hit_ratio() const;
     uint64_t get_hits() const;
